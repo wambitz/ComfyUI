@@ -1,0 +1,56 @@
+# ==============================================================================
+# ComfyUI – Secure Docker Compose
+# Usage:
+#   docker compose up --build        (first run / after code changes)
+#   docker compose up                (subsequent runs)
+#   docker compose down              (stop and remove)
+# ==============================================================================
+services:
+  comfyui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comfyui-secure
+    restart: unless-stopped
+
+    # ── GPU access ──────────────────────────────────────────────────────
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+    # ── Network ─────────────────────────────────────────────────────────
+    # CHOOSE ONE:
+    #
+    # OPTION A (current): Browser UI works, but container CAN reach internet
+    ports:
+      - "127.0.0.1:8188:8188"
+    #
+    # OPTION B: Full air-gap (comment out ports above, uncomment below)
+    # network_mode: none
+    #
+    # NOTE: With network_mode: none, browser UI is disabled.
+    # You'd interact via: docker exec comfyui python3 ...
+
+    # ── Volumes ─────────────────────────────────────────────────────────
+    volumes:
+      # Application code: read-only — mounted instead of copied into image
+      - .:/app:ro
+
+      # Models: read-only — malicious code cannot tamper with your model files
+      - ./models:/app/models:ro
+
+      # Input: read-only for the same reason
+      - ./input:/app/input:ro
+
+      # Output: writable so ComfyUI can save generated images
+      - ./output:/app/output
+
+      # Temp: writable for intermediate files
+      - ./temp:/app/temp
+
+      # User data: writable (ComfyUI stores user settings here)
+      - ./user:/app/user

@@ -1,0 +1,38 @@
+# Keep the build context small and avoid leaking local data into the image
+.git
+.github
+__pycache__
+*.pyc
+*.pyo
+
+# Local model / data directories (mounted as volumes at runtime)
+models/
+input/
+output/
+temp/
+user/
+
+# Development files
+.venv
+.env
+*.egg-info
+dist/
+build/
+node_modules/
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+tests/
+tests-unit/
+
+# IDE
+.vscode/
+.idea/
